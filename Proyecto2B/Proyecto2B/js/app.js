@@ -175,13 +175,13 @@ function onLoad() {
 				indexCount3 = indices3.length;
 
 				let positions = parsedOBJ1.positions;
-				let colors = parsedOBJ1.positions;//Will use position coordinates as colors (as example)
+				let colors = parsedOBJ1.normals;//Will use position coordinates as colors (as example)
 
 				let positions2 = parsedOBJ2.positions;
-				let colors2 = parsedOBJ2.positions;
+				let colors2 = parsedOBJ2.normals;
 
 				let positions3 = parsedOBJ3.positions;
-				let colors3 = parsedOBJ3.positions;
+				let colors3 = parsedOBJ3.normals;
 
 				//vertexShaderSource y fragmentShaderSource estan importadas en index.html <script>
 				//creo el shader
