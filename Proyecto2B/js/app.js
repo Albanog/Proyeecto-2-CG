@@ -18,9 +18,11 @@ var shaderProgramCook = null;
 var vaoTaza = null; //Geometry to render (stored in VAO).
 var vaoCafetera = null; //Geometry to render (stored in VAO).
 var vaoMesa = null;
+var vaoPlano = null;
 var indexCount1 = 0; //indice del primer objeto
 var indexCount2 = 0;	//indice del segundo objeto
 var indexCount3 = 0;
+var indexCount4=0;
 
 
 //Uniform locations.
@@ -60,12 +62,15 @@ var	u_Ro;
 var parsedOBJ1 = null; //Parsed OBJ1 file
 var parsedOBJ2 = null; //Parsed OBJ2 file
 var parsedOBJ3 = null;
+var parsedOBJ4 = null;
 var cam = new Camera(); //vamos a controlar la camara desde esta clase
 
 var tMatTaza = new TransformMatrix(); //matriz de transformacion del obj1 (taza)
 var tMatCafetera=new TransformMatrix(); //matriz de transformacion del obj2 (cafetera)
 var tMatMesa = new TransformMatrix(); //mesa
+var tMatPlano = new TransformMatrix();
 
+var PlanoObj= new Objeto();
 var CafeteraObj=new Objeto();
 var TazaObj=new Objeto();
 var MesaObj=new Objeto();
@@ -147,6 +152,8 @@ function onLoad() {
 	tMatTaza.setBox([0.4,0.4,0,0.7,0.4,0.4]);
 	tMatCafetera.setTransZ(1);
 	tMatCafetera.setBox([0.5,0.5,0,2.1,0.5,0.5]);
+	tMatPlano.setTransY(-3.45);
+	tMatTaza.setTransY(0.01);
 
 
 	//vertexShaderSource y fragmentShaderSource estan importadas en index.html <script>
@@ -157,74 +164,91 @@ function onLoad() {
 	//sin que algun de ellos halla sido ubicdo
 	if (parsedOBJ1==null) console.log("no se cargo el primer objeto");
 		else if (parsedOBJ2== null) console.log("no se cargo el segundo objeto");
-			else
-			{
-				//borro la tabla que modifica el tamaño del canvas. se restaura cuando se reinicia.
-				var Tabla_tam_can = document.getElementById('tabla_tam_canvas');
-				Tabla_tam_can.style.display="none";
+			else if (parsedOBJ2== null) console.log("no se cargo el tercer objeto");
+				else if (parsedOBJ2== null) console.log("no se cargo el cuarto objeto");
+					else
+					{
+						//borro la tabla que modifica el tamaño del canvas. se restaura cuando se reinicia.
+						var Tabla_tam_can = document.getElementById('tabla_tam_canvas');
+						Tabla_tam_can.style.display="none";
 
-				//obtenemos el canvas donde vamos a dibujar
-				let canvas = document.getElementById('webglCanvas');
-				gl = canvas.getContext('webgl2');
-				//obtenemos los indices de los vertices
-				let indices1 = reordenarIndices(parsedOBJ1.indices);
-				indexCount1 = indices1.length;
-				let indices2 = reordenarIndices(parsedOBJ2.indices);
-				indexCount2 = indices2.length;
-				let indices3 = reordenarIndices(parsedOBJ3.indices);
-				indexCount3 = indices3.length;
+						//obtenemos el canvas donde vamos a dibujar
+						let canvas = document.getElementById('webglCanvas');
+						gl = canvas.getContext('webgl2');
+						//obtenemos los indices de los vertices
+						let indices1 = (parsedOBJ1.indices);
+						indexCount1 = indices1.length;
+						let indices2 =(parsedOBJ2.indices);
+						indexCount2 = indices2.length;
+						let indices3 = (parsedOBJ3.indices);
+						indexCount3 = indices3.length;
+						let indices4 = (parsedOBJ4.indices);
+						indexCount4 = indices4.length;
 
-				let positions = parsedOBJ1.positions;
-				let colors = parsedOBJ1.positions;//Will use position coordinates as colors (as example)
+						let positions = parsedOBJ1.positions;
+						let colors = parsedOBJ1.normals;//Will use position coordinates as colors (as example)
 
-				let positions2 = parsedOBJ2.positions;
-				let colors2 = parsedOBJ2.positions;
+						let positions2 = parsedOBJ2.positions;
+						let colors2 = parsedOBJ2.normals;
 
-				let positions3 = parsedOBJ3.positions;
-				let colors3 = parsedOBJ3.positions;
+						let positions3 = parsedOBJ3.positions;
+						let colors3 = parsedOBJ3.normals;
 
-				//vertexShaderSource y fragmentShaderSource estan importadas en index.html <script>
-				//creo el shader
-				shaderProgramOrenNayar = ShaderProgramHelper.create(vertexShaderOrenNayar, fragmentShaderOrenNayar);
-				shaderProgramCook = ShaderProgramHelper.create(vertexShaderCook, fragmentShaderCook);
-				LinkearCook();
-				LinkearOren();
-				
-				CafeteraObj.setEtiqueta("Cook");
-				CafeteraObj.setMaterial(Cromo);
-				TazaObj.setEtiqueta("Oren");
-				TazaObj.setMaterial(Perla);
-				MesaObj.setEtiqueta("Oren");
-				MesaObj.setMaterial(Madera);
+						let positions4 = parsedOBJ4.positions;
+						let colors4 = parsedOBJ4.normals;
 
-				//creo los vao
-				let vertexAttributeInfoArray1 = [
-					new VertexAttributeInfo(positions, posLocation, 3),
-					new VertexAttributeInfo(colors, colLocation, 3)
-				];
-				vaoTaza = VAOHelper.create(indices1, vertexAttributeInfoArray1);
-				let vertexAttributeInfoArray2 = [
-					new VertexAttributeInfo(positions2, posLocation, 3),
-					new VertexAttributeInfo(colors2, colLocation, 3)
-				];
-				vaoCafetera = VAOHelper.create(indices2, vertexAttributeInfoArray2);
-				let vertexAttributeInfoArray3 = [
-					new VertexAttributeInfo(positions3, posLocation, 3),
-					new VertexAttributeInfo(colors3, colLocation, 3)
-				];
-				vaoMesa = VAOHelper.create(indices3, vertexAttributeInfoArray3);
+						//vertexShaderSource y fragmentShaderSource estan importadas en index.html <script>
+						//creo el shader
+						shaderProgramOrenNayar = ShaderProgramHelper.create(vertexShaderOrenNayar, fragmentShaderOrenNayar);
+						shaderProgramCook = ShaderProgramHelper.create(vertexShaderCook, fragmentShaderCook);
+						LinkearCook();
+						LinkearOren();
+						
+						CafeteraObj.setEtiqueta("Cook");
+						CafeteraObj.setMaterial(Cromo);
+						TazaObj.setEtiqueta("Oren");
+						TazaObj.setMaterial(Perla);
+						MesaObj.setEtiqueta("Oren");
+						MesaObj.setMaterial(Madera);
+						PlanoObj.setEtiqueta("Cook");
+						PlanoObj.setMaterial(Oro);
 
-				//seteo el color del canvas
-				gl.clearColor(0.18, 0.18, 0.18, 1.0);
-				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-				//para que los fragmentos no visibles no tapen a los visibles
-				gl.enable(gl.DEPTH_TEST);
+						//creo los vao
+						let vertexAttributeInfoArray1 = [
+							new VertexAttributeInfo(positions, posLocation, 3),
+							new VertexAttributeInfo(colors, colLocation, 3)
+						];
+						vaoTaza = VAOHelper.create(indices1, vertexAttributeInfoArray1);
+						
+						let vertexAttributeInfoArray2 = [
+							new VertexAttributeInfo(positions2, posLocation, 3),
+							new VertexAttributeInfo(colors2, colLocation, 3)
+						];
+						vaoCafetera = VAOHelper.create(indices2, vertexAttributeInfoArray2);
+						
+						let vertexAttributeInfoArray3 = [
+							new VertexAttributeInfo(positions3, posLocation, 3),
+							new VertexAttributeInfo(colors3, colLocation, 3)
+						];
+						vaoMesa = VAOHelper.create(indices3, vertexAttributeInfoArray3);
+						
+						let vertexAttributeInfoArray4 = [
+							new VertexAttributeInfo(positions4, posLocation, 3),
+							new VertexAttributeInfo(colors4, colLocation, 3)
+						];
+						vaoPlano = VAOHelper.create(indices4, vertexAttributeInfoArray4);
 
-				//el boton de renderizar se habilita una vez que estemos listos para renderizar
-				let boton_renderizar = document.getElementById('btnrenderizar');
-				boton_renderizar.disabled=false;
+						//seteo el color del canvas
+						gl.clearColor(0.18, 0.18, 0.18, 1.0);
+						gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+						//para que los fragmentos no visibles no tapen a los visibles
+						gl.enable(gl.DEPTH_TEST);
 
-			}
+						//el boton de renderizar se habilita una vez que estemos listos para renderizar
+						let boton_renderizar = document.getElementById('btnrenderizar');
+						boton_renderizar.disabled=false;
+
+					}
 }
 
 function LinkearCook(){
@@ -330,6 +354,7 @@ function onRender() {
 	DibujarOren(tMatTaza,TazaObj,vaoTaza,indexCount1);
 	DibujarCook(tMatCafetera,CafeteraObj,vaoCafetera,indexCount2);
 	DibujarOren(tMatMesa,MesaObj,vaoMesa,indexCount3);
+	DibujarOren(tMatPlano,PlanoObj,vaoPlano,indexCount4);
 }
 
 
@@ -338,6 +363,7 @@ function CargarModelos()
 	parsedOBJ1 = OBJParser.parseFile(tazajs);
     parsedOBJ2 = OBJParser.parseFile(cafeterajs);
     parsedOBJ3 = OBJParser.parseFile(mesajs);
+    parsedOBJ4 = OBJParser.parseFile(planojs);
 }
 
 //reordena los indices de un obj para poder ser dibujado en forma de wireframes
